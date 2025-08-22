@@ -1,0 +1,19 @@
+Pseudocode/general plan for Tic-Tac-Toe
+
+Things that are needed:
+
+-Function to create a gameboard using an array
+-Function to create player
+-Function to create the Game in general, probably consisting of multiple rounds.
+
+The Game Object needs to:
+-get the gameboard
+-get the two players
+-run a certain amout of rounds
+-decide and output the winner of the Game in general
+
+The round object needs:
+-to get and clear the gameboard
+-to get the choices from the two players
+-make appropriate changes to the board after each move is made
+
