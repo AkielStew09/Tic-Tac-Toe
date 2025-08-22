@@ -21,8 +21,16 @@ const Gameboard = () => {
             console.log(printArr[i]);
         }
     }
+    const getBoard = ()=> boardArr;
 
-    return { boardArr };
+    const acceptMove = (player, indexOfMove)=>{
+        let cell = boardArr[indexOfMove];
+
+        if(cell )
+            cell = player.symbol;
+    }
+
+    return { getBoard, printBoard };
 };
 
 function Player(name, symbol) {
