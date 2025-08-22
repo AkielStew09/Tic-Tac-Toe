@@ -6,6 +6,11 @@ Things that are needed:
 -Function to create player
 -Function to create the Game in general, probably consisting of multiple rounds.
 
+Gameboard needs to:
+-set up the board, initializing it to all empty (using the character '-'),
+ though I guess using an enum would have been better.
+-print it to the console
+
 The Game Object needs to:
 -get the gameboard
 -get the two players
