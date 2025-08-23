@@ -66,7 +66,8 @@ const Gameboard = (() => {
         }
     };
 
-    //function to check if the game is over, ie. if there are three in a row
+
+    //function to check if the game is won, ie. if there are three in a row
     const gameWon = () => {
         //check the three columns for a vertical gameOver
         for (let i = 0; i < 3; ++i) {
@@ -118,13 +119,14 @@ const Gameboard = (() => {
             }
         }
     };
-    const gameDrawn = ()=>{
-        if(gameWon()){
+    const gameOver = ()=>{
+        //if the game has been won or all the squares are used up
+        if(gameWon() || !emptySquares()){
+            return true;
+        }else {
             return false;
-        }else{
-
         }
-    }
+    };
 
     return { setUpBoard, getBoard, printBoard, acceptMove, emptySquares };
 })(); //turned this to an IIFE, my first ever one in fact.
