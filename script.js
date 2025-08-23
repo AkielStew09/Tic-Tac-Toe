@@ -8,6 +8,7 @@ const Gameboard = (() => {
         }
     };
 
+
     const posArr = [
         "topLeft",
         "topMiddle",
@@ -20,6 +21,10 @@ const Gameboard = (() => {
         "bottomRight",
     ];
 
+
+    const emptySquares = ()=>{
+        return boardArr.filter((square)=>square.getSymbol() === "-").length;
+    };
     //Function that takes board postion string and converts it to the
     // corresponding array index.
     const interpret = (position) => {
@@ -62,7 +67,7 @@ const Gameboard = (() => {
     };
 
     //function to check if the game is over, ie. if there are three in a row
-    const gameOver = () => {
+    const gameWon = () => {
         //check the three columns for a vertical gameOver
         for (let i = 0; i < 3; ++i) {
             let top = boardArr[i].getSymbol();
@@ -113,8 +118,15 @@ const Gameboard = (() => {
             }
         }
     };
+    const gameDrawn = ()=>{
+        if(gameWon()){
+            return false;
+        }else{
 
-    return { setUpBoard, getBoard, printBoard, acceptMove };
+        }
+    }
+
+    return { setUpBoard, getBoard, printBoard, acceptMove, emptySquares };
 })(); //turned this to an IIFE, my first ever one in fact.
 
 const Square = () => {
@@ -148,33 +160,26 @@ function Player(name, symbol) {
 function playRound(player1, player2) {
     let activePlayer = player1;
 
-    const turn = () => {
+    const handOver = () => {
         activePlayer = activePlayer === player1 ? player2 : player1;
     };
 
     Gameboard.setUpBoard();
     console.log("Board has been initialized.");
     Gameboard.printBoard();
+    
 }
 
 //test for the Gameboard functions and Player object
-function test() {
+function test(){
     Gameboard.setUpBoard();
     console.log("Board has been initialized.");
     Gameboard.printBoard();
-
-    let playerName = prompt("Hello player1, what is your name: ");
-    //create player object
-    let player1 = Player(playerName, "x");
-
-    let pos = prompt(`Alright, ${player1.name}. Make a move: `);
-    //accept board position as input and then make the move
-    Gameboard.acceptMove(player1, pos);
-
-    console.log(
-        "A move has been made. " +
-            player1.name +
-            ` has made a move on the ${pos} square. Let's print the board and see.`
-    );
+    console.log("The board has " + Gameboard.emptySquares() + " spaces left.");
+    let leo = Player("Leo", "x");
+    Gameboard.acceptMove(leo, "topRight");
+    console.log(leo.name + " has moved.");
     Gameboard.printBoard();
+    console.log("The board has " + Gameboard.emptySquares() + " spaces left.");
 }
+
