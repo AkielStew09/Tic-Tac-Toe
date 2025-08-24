@@ -8,6 +8,7 @@ const Gameboard = (() => {
         }
     };
 
+    let winningSymbol = null;
 
     const posArr = [
         "topLeft",
@@ -21,10 +22,30 @@ const Gameboard = (() => {
         "bottomRight",
     ];
 
-
-    const emptySquares = ()=>{
-        return boardArr.filter((square)=>square.getSymbol() === "-").length;
+    const emptySquares = () => {
+        return boardArr.filter((square) => square.getSymbol() === "-").length;
     };
+
+    const countSymbols = () => {
+        let xCount = boardArr.filter(
+            (square) => square.getSymbol() === "x"
+        ).length;
+        let oCount = boardArr.filter(
+            (square) => square.getSymbol() === "o"
+        ).length;
+
+        let majority = "";
+        if (xCount > oCount) {
+            majority = "x";
+        } else if (oCount > xCount) {
+            majority = "o";
+        } else {
+            majority = null;
+        }
+
+        return { xCount, oCount, majority };
+    };
+
     //Function that takes board postion string and converts it to the
     // corresponding array index.
     const interpret = (position) => {
@@ -47,6 +68,7 @@ const Gameboard = (() => {
             //This prints the boardArr in three rows of three.
             //slice(start, end - not including end)
             //first example: slice(0, 3)
+
             console.log(
                 boardArr
                     .slice(i * 3, i * 3 + 3)
@@ -63,9 +85,10 @@ const Gameboard = (() => {
 
         if (square.getSymbol() === "-") {
             square.acceptSymbol(player);
+        } else {
+            console.error("Invalid Move. The square is already occupied.");
         }
     };
-
 
     //function to check if the game is won, ie. if there are three in a row
     const gameWon = () => {
@@ -73,12 +96,13 @@ const Gameboard = (() => {
         for (let i = 0; i < 3; ++i) {
             let top = boardArr[i].getSymbol();
             //+3 brings you to the square directly under
-            let middle = boardArr[i + 3].getSymbol(); 
-            let bottom = boardArr[(i+3) + 3].getSymbol();
+            let middle = boardArr[i + 3].getSymbol();
+            let bottom = boardArr[i + 3 + 3].getSymbol();
             //eg. for the first column, the top is the symbol at index 0,
             // the middle is 3 and bottom is 6
 
             if (top === middle && middle === bottom) {
+                winningSymbol = middle;
                 return true;
             }
         }
@@ -86,9 +110,10 @@ const Gameboard = (() => {
         for (let i = 0; i < 9; i += 3) {
             let left = boardArr[i].getSymbol();
             let middle = boardArr[i + 1].getSymbol(); //+1 brings you one square to the right
-            let right = boardArr[(i+1) + 1].getSymbol();
+            let right = boardArr[i + 1 + 1].getSymbol();
 
-            if (left === middle  && middle === right) {
+            if (left === middle && middle === right) {
+                winningSymbol = middle;
                 return true;
             }
         }
@@ -98,18 +123,20 @@ const Gameboard = (() => {
             switch (i) {
                 case 0:
                     top = boardArr[i].getSymbol();
-                    middle = boardArr[(i + 3) + 1].getSymbol(); 
+                    middle = boardArr[i + 3 + 1].getSymbol();
                     //+3 would be under, so that +1 is diagonally down-right
-                    bottom = boardArr[(i+3+1) + 3 + 1].getSymbol();
+                    bottom = boardArr[i + 3 + 1 + 3 + 1].getSymbol();
                     if (top === middle && middle === bottom) {
+                        winningSymbol = middle;
                         return true;
                     }
                     break;
                 case 2:
                     top = boardArr[i].getSymbol();
                     middle = boardArr[i + 3 - 1].getSymbol(); //+3 would be under, so that -1 is diagonally down-left
-                    bottom = boardArr[(i+3-1) + 3 - 1].getSymbol();
+                    bottom = boardArr[i + 3 - 1 + 3 - 1].getSymbol();
                     if (top === middle && middle === bottom) {
+                        winningSymbol = middle;
                         return true;
                     }
                     break;
@@ -119,16 +146,26 @@ const Gameboard = (() => {
             }
         }
     };
-    const gameOver = ()=>{
+
+    const getWinSymbol = () => winningSymbol;
+
+    const gameOver = () => {
         //if the game has been won or all the squares are used up
-        if(gameWon() || !emptySquares()){
+        if (gameWon() || !emptySquares()) {
             return true;
-        }else {
+        } else {
             return false;
         }
     };
 
-    return { setUpBoard, getBoard, printBoard, acceptMove, emptySquares };
+    return {
+        setUpBoard,
+        getBoard,
+        printBoard,
+        acceptMove,
+        gameOver,
+        getWinSymbol,
+    };
 })(); //turned this to an IIFE, my first ever one in fact.
 
 const Square = () => {
@@ -152,7 +189,6 @@ const Square = () => {
 };
 
 function Player(name, symbol) {
-    //id as in 1 for player 1 etc.
     let score = 0;
     const increaseScore = () => ++score;
 
@@ -160,28 +196,46 @@ function Player(name, symbol) {
 }
 
 function playRound(player1, player2) {
+    let players = [player1, player2];
     let activePlayer = player1;
+    let roundWinner = null;
 
     const handOver = () => {
         activePlayer = activePlayer === player1 ? player2 : player1;
     };
 
     Gameboard.setUpBoard();
-    console.log("Board has been initialized.");
     Gameboard.printBoard();
+    console.log(
+        "New round. The board has been initialized. " + activePlayer.name + "'s turn."
+    );
+
+    do{
+        let movePos = prompt(
+            `${activePlayer.name}, enter the square where you will place your ${activePlayer.symbol}`
+        );
+        Gameboard.acceptMove(activePlayer, movePos);
+        console.log("Move has been made to " + movePos);
+        Gameboard.printBoard();
+        handOver();
+    }while (Gameboard.gameOver() === false);
     
+    for (let player of players) {
+        if(player.symbol === Gameboard.getWinSymbol()){
+            roundWinner = player;
+            alert(`${roundWinner} wins this round!`);
+        }
+    }
 }
+function Game(){
+    p1 = Player("Urien", "x");
+    p2 = Player("Molina", "o");
+    
+    playRound(p1, p2);
+}
+
 
 //test for the Gameboard functions and Player object
-function test(){
-    Gameboard.setUpBoard();
-    console.log("Board has been initialized.");
-    Gameboard.printBoard();
-    console.log("The board has " + Gameboard.emptySquares() + " spaces left.");
-    let leo = Player("Leo", "x");
-    Gameboard.acceptMove(leo, "topRight");
-    console.log(leo.name + " has moved.");
-    Gameboard.printBoard();
-    console.log("The board has " + Gameboard.emptySquares() + " spaces left.");
-}
+function test() {}
 
+Game();

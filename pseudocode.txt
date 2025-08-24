@@ -17,9 +17,9 @@ The Game Object needs to:
 -run a certain amout of rounds
 -decide and output the winner of the Game in general
 
-The round object needs:
+The round object needs to:
 -accept the two players as arguments
--to get and clear the gameboard
+-get and clear the gameboard
 -set up a loop that prompts the active player to enter their move over and over until the game is over
 -make appropriate changes to the board after each move is made
 -checks if the game is won/drawn
