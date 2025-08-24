@@ -22,28 +22,9 @@ const Gameboard = (() => {
         "bottomRight",
     ];
 
+    //returns amount of empty squares
     const emptySquares = () => {
         return boardArr.filter((square) => square.getSymbol() === "-").length;
-    };
-
-    const countSymbols = () => {
-        let xCount = boardArr.filter(
-            (square) => square.getSymbol() === "x"
-        ).length;
-        let oCount = boardArr.filter(
-            (square) => square.getSymbol() === "o"
-        ).length;
-
-        let majority = "";
-        if (xCount > oCount) {
-            majority = "x";
-        } else if (oCount > xCount) {
-            majority = "o";
-        } else {
-            majority = null;
-        }
-
-        return { xCount, oCount, majority };
     };
 
     //Function that takes board postion string and converts it to the
@@ -94,8 +75,10 @@ const Gameboard = (() => {
     const gameWon = () => {
         //check the three columns for a vertical gameOver
         for (let i = 0; i < 3; ++i) {
+            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+
             let top = boardArr[i].getSymbol();
-            //+3 brings you to the square directly under
+            //index+3 brings you to the square directly under
             let middle = boardArr[i + 3].getSymbol();
             let bottom = boardArr[i + 3 + 3].getSymbol();
             //eg. for the first column, the top is the symbol at index 0,
@@ -108,6 +91,8 @@ const Gameboard = (() => {
         }
         //check the rows
         for (let i = 0; i < 9; i += 3) {
+            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+
             let left = boardArr[i].getSymbol();
             let middle = boardArr[i + 1].getSymbol(); //+1 brings you one square to the right
             let right = boardArr[i + 1 + 1].getSymbol();
@@ -119,6 +104,8 @@ const Gameboard = (() => {
         }
         //check diagonally. I'll use 0 and 2 as the two top corners and go diagonally from each
         for (let i = 0; i <= 2; i += 2) {
+            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+
             let top, middle, bottom;
             switch (i) {
                 case 0:
@@ -190,53 +177,94 @@ const Square = () => {
 
 function Player(name, symbol) {
     let score = 0;
-    const increaseScore = () => ++score;
 
-    return { name, symbol, increaseScore };
+    const getName = () => name;
+    const getSymbol = () => symbol;
+    const getScore = () => score;
+    const increaseScore = () => ++score;
+    const resetScore = () => (score = 0);
+
+    return { getName, getSymbol, getScore, increaseScore, resetScore };
 }
 
-function playRound(player1, player2) {
-    let players = [player1, player2];
-    let activePlayer = player1;
-    let roundWinner = null;
-
-    const handOver = () => {
-        activePlayer = activePlayer === player1 ? player2 : player1;
+const Game = (function () {
+    const winMessage = (p1, p2) => {
+        if (p1.getScore() > p2.getScore()) {
+            alert(
+                p1.getName() +
+                    " IS THE WINNER WITH A SCORE OF " +
+                    p1.getScore() +
+                    "!"
+            );
+        } else if (p2.getScore() > p1.getScore()) {
+            alert(
+                `${p1.getName()} IS THE WINNER WITH A SCORE OF ${p1.getScore()}!`
+            );
+        } else {
+            alert(
+                `The final result is a draw, with both players scoring ${p2.getScore()}`
+            );
+        }
     };
 
-    Gameboard.setUpBoard();
-    Gameboard.printBoard();
-    console.log(
-        "New round. The board has been initialized. " +
-            activePlayer.name +
-            "'s turn."
-    );
+    const playRound = (player1, player2, roundNum) => {
+        let players = [player1, player2];
+        let roundWinner = null;
+        let activePlayer = player1;
 
-    do {
-        let movePos = prompt(
-            `${activePlayer.name}, enter the square where you will place your ${activePlayer.symbol}`
-        );
-        Gameboard.acceptMove(activePlayer, movePos);
-        console.log("Move has been made to " + movePos);
+        const handOver = () => {
+            activePlayer = activePlayer === player1 ? player2 : player1;
+        };
+
+        Gameboard.setUpBoard();
         Gameboard.printBoard();
-        handOver();
-    } while (Gameboard.gameOver() === false);
+        alert(
+            `Round ${roundNum} has started. The board has been initialized. ` +
+                activePlayer.getName() +
+                "'s turn."
+        );
 
-    for (let player of players) {
-        if (player.symbol === Gameboard.getWinSymbol()) {
-            roundWinner = player;
-            alert(`${roundWinner} wins this round!`);
+        do {
+            //read move from input
+            let movePos = prompt(
+                `${activePlayer.getName()}, place your ${activePlayer.getSymbol()}.`
+            );
+            Gameboard.acceptMove(activePlayer, movePos);
+            alert(activePlayer.getName() + " has moved to " + movePos);
+            Gameboard.printBoard();
+            handOver();
+        } while (Gameboard.gameOver() === false);
+
+        if (Gameboard.gameWon()) {
+            players.map((player) => {
+                if (player.getSymbol() === Gameboard.getWinSymbol()) {
+                    roundWinner = player;
+                    roundWinner.increaseScore();
+                    alert(`${roundWinner} wins this round!`);
+                }
+            });
+        } else {
+            //a draw
+            alert(`This round is a draw!`);
         }
+    };
+    function playGame() {
+        alert("Welcome to Tic-tac-toe!");
+        let name1 = prompt("Player 1, enter you name. You will be using x");
+        let name2 = prompt("Player 2, enter you name. You will be using o");
+        rounds = 3;
+        alert(`The winner will be decided over ${rounds} rounds.`);
+        p1 = Player(name1, "x");
+        p2 = Player(name2, "o");
+
+        for (let i = 0; i < rounds; ++i) {
+            let currentRound = i + 1;
+            playRound(p1, p2, currentRound);
+        }
+        winMessage(p1, p2);
     }
-}
-function Game() {
-    p1 = Player("Urien", "x");
-    p2 = Player("Molina", "o");
 
-    playRound(p1, p2);
-}
+    return {playGame};
+})();
 
-//test for the Gameboard functions and Player object
-function test() {}
-
-Game();
+Game.playGame();

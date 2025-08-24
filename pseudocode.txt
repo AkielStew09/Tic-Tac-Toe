@@ -19,9 +19,13 @@ The Game Object needs to:
 
 The round object needs to:
 -accept the two players as arguments
--get and clear the gameboard
--set up a loop that prompts the active player to enter their move over and over until the game is over
--make appropriate changes to the board after each move is made
--checks if the game is won/drawn
+-set the active player as player 1
+-prepare and clear the gameboard
+-set up a loop that:
+----prompts the active player to enter their move
+----puts the move on the board
+----switches the active character
+----checks if the game is won/drawn to continue loop
+-prints result of round
 -adjust the players' scores accordingly
 
