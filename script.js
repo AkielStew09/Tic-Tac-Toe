@@ -207,10 +207,12 @@ function playRound(player1, player2) {
     Gameboard.setUpBoard();
     Gameboard.printBoard();
     console.log(
-        "New round. The board has been initialized. " + activePlayer.name + "'s turn."
+        "New round. The board has been initialized. " +
+            activePlayer.name +
+            "'s turn."
     );
 
-    do{
+    do {
         let movePos = prompt(
             `${activePlayer.name}, enter the square where you will place your ${activePlayer.symbol}`
         );
@@ -218,22 +220,21 @@ function playRound(player1, player2) {
         console.log("Move has been made to " + movePos);
         Gameboard.printBoard();
         handOver();
-    }while (Gameboard.gameOver() === false);
-    
+    } while (Gameboard.gameOver() === false);
+
     for (let player of players) {
-        if(player.symbol === Gameboard.getWinSymbol()){
+        if (player.symbol === Gameboard.getWinSymbol()) {
             roundWinner = player;
             alert(`${roundWinner} wins this round!`);
         }
     }
 }
-function Game(){
+function Game() {
     p1 = Player("Urien", "x");
     p2 = Player("Molina", "o");
-    
+
     playRound(p1, p2);
 }
-
 
 //test for the Gameboard functions and Player object
 function test() {}
