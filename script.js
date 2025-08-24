@@ -151,6 +151,7 @@ const Gameboard = (() => {
         printBoard,
         acceptMove,
         gameOver,
+        gameWon,
         getWinSymbol,
     };
 })(); //turned this to an IIFE, my first ever one in fact.
@@ -160,8 +161,8 @@ const Square = () => {
 
     //function to be drawn in by a player. A setter, essentially.
     const acceptSymbol = (player) => {
-        if (player.symbol === "x" || player.symbol === "o") {
-            symbol = player.symbol;
+        if (player.getSymbol() === "x" || player.getSymbol() === "o") {
+            symbol = player.getSymbol();
         } else {
             console.error(
                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
@@ -198,7 +199,7 @@ const Game = (function () {
             );
         } else if (p2.getScore() > p1.getScore()) {
             alert(
-                `${p1.getName()} IS THE WINNER WITH A SCORE OF ${p1.getScore()}!`
+                `${p2.getName()} IS THE FINAL WINNER, SCORING ${p2.getScore()}!`
             );
         } else {
             alert(
@@ -217,9 +218,11 @@ const Game = (function () {
         };
 
         Gameboard.setUpBoard();
+        console.log(`Board initialized.\nScores: ${player1.getName()}-${player1.getScore()}, 
+        ${player2.getName()}-${player2.getScore()}`);
         Gameboard.printBoard();
         alert(
-            `Round ${roundNum} has started. The board has been initialized. ` +
+            `Round ${roundNum} has started. ` +
                 activePlayer.getName() +
                 "'s turn."
         );
@@ -230,7 +233,7 @@ const Game = (function () {
                 `${activePlayer.getName()}, place your ${activePlayer.getSymbol()}.`
             );
             Gameboard.acceptMove(activePlayer, movePos);
-            alert(activePlayer.getName() + " has moved to " + movePos);
+            console.log(activePlayer.getName() + " has moved to " + movePos);
             Gameboard.printBoard();
             handOver();
         } while (Gameboard.gameOver() === false);
@@ -240,7 +243,7 @@ const Game = (function () {
                 if (player.getSymbol() === Gameboard.getWinSymbol()) {
                     roundWinner = player;
                     roundWinner.increaseScore();
-                    alert(`${roundWinner} wins this round!`);
+                    alert(`${roundWinner.getName()} wins this round!`);
                 }
             });
         } else {
@@ -250,8 +253,8 @@ const Game = (function () {
     };
     function playGame() {
         alert("Welcome to Tic-tac-toe!");
-        let name1 = prompt("Player 1, enter you name. You will be using x");
-        let name2 = prompt("Player 2, enter you name. You will be using o");
+        let name1 = prompt("Player 1, enter your name. You will be using x");
+        let name2 = prompt("Player 2, enter your name. You will be using o");
         rounds = 3;
         alert(`The winner will be decided over ${rounds} rounds.`);
         p1 = Player(name1, "x");
@@ -264,7 +267,5 @@ const Game = (function () {
         winMessage(p1, p2);
     }
 
-    return {playGame};
+    return { playGame };
 })();
-
-Game.playGame();
