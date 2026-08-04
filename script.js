@@ -31,13 +31,18 @@ const Gameboard = (() => {
     // corresponding array index.
     const interpret = (position) => {
         //the position param is a string that should be in the posArr below.
-        for (let i = 0; i < posArr.length; ++i) {
-            if (posArr[i] === position) {
-                return i;
-            }
-        }
-        console.error("Invalid board position");
-        return -1;
+        let index = posArr.findIndex(pos => pos === position);
+        if (index === -1)
+            console.error("Invalid board position");
+        return index;
+
+        // for (let i = 0; i < posArr.length; ++i) {
+        //     if (posArr[i] === position) {
+        //         return i;
+        //     }
+        // }
+        // console.error("Invalid board position");
+        // return -1;
     };
 
     //return the board
@@ -85,7 +90,7 @@ const Gameboard = (() => {
             // the middle is 3 and bottom is 6
 
             if (top === middle && middle === bottom) {
-                winningSymbol = middle;
+                winningSymbol = top;
                 return true;
             }
         }
@@ -193,9 +198,9 @@ const Game = (function () {
         if (p1.getScore() > p2.getScore()) {
             alert(
                 p1.getName() +
-                    " IS THE WINNER WITH A SCORE OF " +
-                    p1.getScore() +
-                    "!"
+                " IS THE WINNER WITH A SCORE OF " +
+                p1.getScore() +
+                "!"
             );
         } else if (p2.getScore() > p1.getScore()) {
             alert(
@@ -223,8 +228,8 @@ const Game = (function () {
         Gameboard.printBoard();
         alert(
             `Round ${roundNum} has started. ` +
-                activePlayer.getName() +
-                "'s turn."
+            activePlayer.getName() +
+            "'s turn."
         );
 
         do {
@@ -269,3 +274,5 @@ const Game = (function () {
 
     return { playGame };
 })();
+
+Game.playGame();
