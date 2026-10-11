@@ -188,7 +188,7 @@ function Player(name, symbol) {
     const getSymbol = () => symbol;
     const getScore = () => score;
     const increaseScore = () => ++score;
-    const resetScore = () => (score = 0);
+    const resetScore = () => score = 0;
 
     return { getName, getSymbol, getScore, increaseScore, resetScore };
 }
@@ -265,8 +265,7 @@ const Game = (function () {
         p1 = Player(name1, "x");
         p2 = Player(name2, "o");
 
-        for (let i = 0; i < rounds; ++i) {
-            let currentRound = i + 1;
+        for (let currentRound = 1; currentRound <= rounds; ++currentRound) {
             playRound(p1, p2, currentRound);
         }
         winMessage(p1, p2);
