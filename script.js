@@ -4,7 +4,7 @@ const Gameboard = (() => {
     let boardArr = [];
     const setUpBoard = () => {
         for (let i = 0; i < 9; ++i) {
-            boardArr[i] = Square();
+            boardArr[i] = new Square();
         }
     };
 
@@ -161,36 +161,68 @@ const Gameboard = (() => {
     };
 })(); //turned this to an IIFE, my first ever one in fact.
 
-const Square = () => {
-    let symbol = "-";
+// const Square = () => {
+//     let symbol = "-";
+//
+//     //function to be drawn in by a player. A setter, essentially.
+//     const acceptSymbol = (player) => {
+//         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
+//             symbol = player.getSymbol();
+//         } else {
+//             console.error(
+//                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
+//             );
+//         }
+//     };
+//
+//     //getter
+//     const getSymbol = () => symbol;
+//
+//     return { acceptSymbol, getSymbol };
+// };
 
-    //function to be drawn in by a player. A setter, essentially.
-    const acceptSymbol = (player) => {
+class Square {
+    #symbol;
+    constructor() {
+        this.#symbol = " ";
+    }
+
+    acceptSymbol(player) {
         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
-            symbol = player.getSymbol();
+            this.symbol = player.getSymbol();
         } else {
             console.error(
                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
             );
         }
-    };
+    }
 
-    //getter
-    const getSymbol = () => symbol;
+    getSymbol() { return this.#symbol }
+}
 
-    return { acceptSymbol, getSymbol };
-};
+// function Player(name, symbol) {
+//     let score = 0;
+//
+//     const getName = () => name;
+//     const getSymbol = () => symbol;
+//     const getScore = () => score;
+//     const increaseScore = () => ++score;
+//     const resetScore = () => score = 0;
+//
+//     return { getName, getSymbol, getScore, increaseScore, resetScore };
+// }
 
-function Player(name, symbol) {
-    let score = 0;
-
-    const getName = () => name;
-    const getSymbol = () => symbol;
-    const getScore = () => score;
-    const increaseScore = () => ++score;
-    const resetScore = () => score = 0;
-
-    return { getName, getSymbol, getScore, increaseScore, resetScore };
+class Player {
+    constructor(name, symbol) {
+        this.name = name;
+        this.symbol = symbol;
+        this.score = 0;
+    }
+    getName() { return this.name }
+    getSymbol() { return this.symbol }
+    getScore() { return this.score }
+    increaseScore() { ++this.score }
+    resetScore() { this.score = 0 }
 }
 
 const Game = (function () {
@@ -262,8 +294,8 @@ const Game = (function () {
         let name2 = prompt("Player 2, enter your name. You will be using o");
         rounds = 3;
         alert(`The winner will be decided over ${rounds} rounds.`);
-        p1 = Player(name1, "x");
-        p2 = Player(name2, "o");
+        p1 = new Player(name1, "x");
+        p2 = new Player(name2, "o");
 
         for (let currentRound = 1; currentRound <= rounds; ++currentRound) {
             playRound(p1, p2, currentRound);
