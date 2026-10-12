@@ -1,0 +1,22 @@
+* {
+    box-sizing: border-box;
+    border: 0;
+    padding: 0;
+}
+
+.board {
+    border: 1px solid green;
+    background-color: black;
+    display: grid;
+    grid-template-columns: repeat(3, 10em);
+    grid-template-rows: repeat(3, 10em);
+    width: fit-content;
+    gap: 0.2em;
+    justify-content: center;
+    padding: 0;
+}
+
+.square {
+    background-color: rebeccapurple;
+    font-size: 9em;
+}

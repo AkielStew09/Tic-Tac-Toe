@@ -306,4 +306,7 @@ const Game = (function () {
     return { playGame };
 })();
 
-Game.playGame();
+// Game.playGame();
+for (let i = 0; i < 9; ++i) {
+    document.querySelector(".board").innerHTML += `<button class="square">X</button>`;
+}
