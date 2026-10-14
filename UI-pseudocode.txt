@@ -1,0 +1,8 @@
+
+#Part 1 - Getting User Iput
+
+The new UI should start with a greeting heading and a form for the two players' information.
+This can be done with a function that appends this form onto the page.
+It should be a replacement for the start of Game.playGame() which prompts the user with alerts.
+It should have a submit button whose event listener will gather the names and pass them to the 
+and pass it to the game logic.

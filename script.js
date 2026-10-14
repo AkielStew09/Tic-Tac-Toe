@@ -292,7 +292,7 @@ const Game = (function () {
         alert("Welcome to Tic-tac-toe!");
         let name1 = prompt("Player 1, enter your name. You will be using x");
         let name2 = prompt("Player 2, enter your name. You will be using o");
-        rounds = 3;
+        const rounds = 3;
         alert(`The winner will be decided over ${rounds} rounds.`);
         p1 = new Player(name1, "x");
         p2 = new Player(name2, "o");
@@ -307,6 +307,21 @@ const Game = (function () {
 })();
 
 // Game.playGame();
-for (let i = 0; i < 9; ++i) {
-    document.querySelector(".board").innerHTML += `<button class="square">X</button>`;
-}
+
+const ui_printBoard = (sideSize = 3) => {
+    const squareAmount = sideSize ** 2;
+
+    document.querySelector(".container").innerHTML = `
+            <h2 class="title"></h2>
+            <div class="board"></div>
+    `;
+
+    //grab the board element which is now in the DOM
+    const boardElement = document.querySelector(".board");
+
+    //populate it with the 9 buttons for the squares
+    for (let i = 0; i < squareAmount; ++i) {
+        boardElement.innerHTML += `<button class="square" data-index="${i}"></button>`;
+    }
+};
+
