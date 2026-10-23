@@ -1,6 +1,6 @@
 const Gameboard = (() => {
     //we'll have the array be nine elements long with values of
-    //either 'x', 'o', or '-' for empty.
+    //either 'x', 'o', or '' for empty.
     let boardArr = [];
     const setUpBoard = () => {
         for (let i = 0; i < 9; ++i) {
@@ -184,12 +184,12 @@ const Gameboard = (() => {
 class Square {
     #symbol;
     constructor() {
-        this.#symbol = " ";
+        this.#symbol = '';
     }
 
     acceptSymbol(player) {
         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
-            this.symbol = player.getSymbol();
+            this.#symbol = player.getSymbol();
         } else {
             console.error(
                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
@@ -225,7 +225,7 @@ class Player {
     resetScore() { this.score = 0 }
 }
 
-const Game = (function () {
+const Game = function () {
     const winMessage = (p1, p2) => {
         if (p1.getScore() > p2.getScore()) {
             alert(
@@ -288,14 +288,15 @@ const Game = (function () {
             alert(`This round is a draw!`);
         }
     };
-    function playGame() {
-        alert("Welcome to Tic-tac-toe!");
-        let name1 = prompt("Player 1, enter your name. You will be using x");
-        let name2 = prompt("Player 2, enter your name. You will be using o");
+
+    function playGame(player1name = "Player 1", player2name = "Player 2") {
+        // alert("Welcome to Tic-tac-toe!");
+        // let name1 = prompt("Player 1, enter your name. You will be using x");
+        // let name2 = prompt("Player 2, enter your name. You will be using o");
         const rounds = 3;
         alert(`The winner will be decided over ${rounds} rounds.`);
-        p1 = new Player(name1, "x");
-        p2 = new Player(name2, "o");
+        p1 = new Player(player1name, "x");
+        p2 = new Player(player2name, "o");
 
         for (let currentRound = 1; currentRound <= rounds; ++currentRound) {
             playRound(p1, p2, currentRound);
@@ -303,25 +304,55 @@ const Game = (function () {
         winMessage(p1, p2);
     }
 
-    return { playGame };
-})();
+    return { playGame, winMessage, playRound };
+}
 
-// Game.playGame();
 
-const ui_printBoard = (sideSize = 3) => {
-    const squareAmount = sideSize ** 2;
+function ScreenController() {
+    const game = Game();
 
-    document.querySelector(".container").innerHTML = `
-            <h2 class="title"></h2>
-            <div class="board"></div>
-    `;
+    const ui_printForm = () => {
 
-    //grab the board element which is now in the DOM
-    const boardElement = document.querySelector(".board");
+        const container = document.querySelector(".container");
+        container.innerHTML = `
+            <h2 class="intro-title">Welcome To Tic-Tac-Toe!</h2>
+            <label for="p1name">Player 1, enter your name. You will be using x:</label>
+            <input type="text" id="p1name" class="textbox">
 
-    //populate it with the 9 buttons for the squares
-    for (let i = 0; i < squareAmount; ++i) {
-        boardElement.innerHTML += `<button class="square" data-index="${i}"></button>`;
-    }
-};
+            <label for="p2name">Player 2, enter your name. You will be using x:</label>
+            <input type="text" id="p2name" class="textbox">
 
+            <button class="startButton">Start!</button>
+
+        `;
+
+        const startButton = document.querySelector(".startButton");
+        startButton.addEventListener("click", () => {
+            //grab player names, clear the screen, and play the game using the names
+            let p1name = document.querySelector("#p1name").value;
+            let p2name = document.querySelector("#p2name").value;
+            container.innerHTML = "";
+            game.playGame(p1name, p2name);
+        });
+    };
+
+    const ui_printBoard = (sideSize = 3) => {
+
+        //grab the container and put the title and game board in there
+        const container = document.querySelector(".container");
+        container.innerHTML = `
+                <h2 class="title">Tic-Tac-Toe</h2>
+                <div class="board"></div>
+        `;
+
+        let board = Gameboard.getBoard();
+
+        //grab that board element
+        const boardElement = document.querySelector(".board");
+
+        //populate it with buttons for the squares
+        for (let i = 0; i < squareAmount; ++i) {
+            boardElement.innerHTML += `<button class="square" data-index="${i}"></button>`;
+        }
+    };
+}
