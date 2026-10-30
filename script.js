@@ -69,7 +69,7 @@ const Gameboard = (() => {
         //retrieve the Square object at that index
         let square = boardArr[indexOfMove];
 
-        if (square.getSymbol() === "-") {
+        if (square.getSymbol() === "") {
             square.acceptSymbol(player);
         } else {
             console.error("Invalid Move. The square is already occupied.");
@@ -161,33 +161,18 @@ const Gameboard = (() => {
     };
 })(); //turned this to an IIFE, my first ever one in fact.
 
-// const Square = () => {
-//     let symbol = "-";
-//
-//     //function to be drawn in by a player. A setter, essentially.
-//     const acceptSymbol = (player) => {
-//         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
-//             symbol = player.getSymbol();
-//         } else {
-//             console.error(
-//                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
-//             );
-//         }
-//     };
-//
-//     //getter
-//     const getSymbol = () => symbol;
-//
-//     return { acceptSymbol, getSymbol };
-// };
 
 class Square {
+    //this is how you make a field private
     #symbol;
     constructor() {
         this.#symbol = '';
     }
 
     acceptSymbol(player) {
+        //symbol needs to be the empty string, if not cancel this
+        if (this.#symbol !== '') return;
+
         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
             this.#symbol = player.getSymbol();
         } else {
@@ -199,18 +184,6 @@ class Square {
 
     getSymbol() { return this.#symbol }
 }
-
-// function Player(name, symbol) {
-//     let score = 0;
-//
-//     const getName = () => name;
-//     const getSymbol = () => symbol;
-//     const getScore = () => score;
-//     const increaseScore = () => ++score;
-//     const resetScore = () => score = 0;
-//
-//     return { getName, getSymbol, getScore, increaseScore, resetScore };
-// }
 
 class Player {
     constructor(name, symbol) {
@@ -225,7 +198,21 @@ class Player {
     resetScore() { this.score = 0 }
 }
 
-const Game = function () {
+const Game = function (p1name, p2name) {
+
+    const players = [
+        new Player(p1name, 'x'),
+        new Player(p2name, 'o')
+    ];
+
+    let activePlayer = players[0];
+
+    const handOver = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0];
+    };
+
+    const getActivePlayer = () => activePlayer;
+
     const winMessage = (p1, p2) => {
         if (p1.getScore() > p2.getScore()) {
             alert(
@@ -245,24 +232,18 @@ const Game = function () {
         }
     };
 
-    const playRound = (player1, player2, roundNum) => {
-        let players = [player1, player2];
+    const playRound = (roundNum) => {
         let roundWinner = null;
-        let activePlayer = player1;
-
-        const handOver = () => {
-            activePlayer = activePlayer === player1 ? player2 : player1;
-        };
 
         Gameboard.setUpBoard();
         console.log(`Board initialized.\nScores: ${player1.getName()}-${player1.getScore()}, 
         ${player2.getName()}-${player2.getScore()}`);
         Gameboard.printBoard();
-        alert(
-            `Round ${roundNum} has started. ` +
-            activePlayer.getName() +
-            "'s turn."
-        );
+        // alert(
+        //     `Round ${roundNum} has started. ` +
+        //     activePlayer.getName() +
+        //     "'s turn."
+        // );
 
         do {
             //read move from input
@@ -294,7 +275,7 @@ const Game = function () {
         // let name1 = prompt("Player 1, enter your name. You will be using x");
         // let name2 = prompt("Player 2, enter your name. You will be using o");
         const rounds = 3;
-        alert(`The winner will be decided over ${rounds} rounds.`);
+        // alert(`The winner will be decided over ${rounds} rounds.`);
         p1 = new Player(player1name, "x");
         p2 = new Player(player2name, "o");
 
@@ -304,12 +285,11 @@ const Game = function () {
         winMessage(p1, p2);
     }
 
-    return { playGame, winMessage, playRound };
+    return { playGame, winMessage, playRound, getActivePlayer, handOver };
 }
 
 
 function ScreenController() {
-    const game = Game();
 
     const ui_printForm = () => {
 
@@ -328,31 +308,49 @@ function ScreenController() {
 
         const startButton = document.querySelector(".startButton");
         startButton.addEventListener("click", () => {
+            //
             //grab player names, clear the screen, and play the game using the names
-            let p1name = document.querySelector("#p1name").value;
-            let p2name = document.querySelector("#p2name").value;
-            container.innerHTML = "";
-            game.playGame(p1name, p2name);
+            const p1name = document.querySelector("#p1name").value;
+            const p2name = document.querySelector("#p2name").value;
+            const game = Game(p1name, p2name);
+            let round = 1;
+            Gameboard.setUpBoard();
+            ui_printBoard(game, round);
         });
     };
 
-    const ui_printBoard = (sideSize = 3) => {
+    const ui_printBoard = (game, round) => {
+        //set up the board and store a reference to it
+        const board = Gameboard.getBoard();
 
         //grab the container and put the title and game board in there
         const container = document.querySelector(".container");
         container.innerHTML = `
-                <h2 class="title">Tic-Tac-Toe</h2>
+                <h2 class="title">${game.getActivePlayer().getName()}'s turn</h2>
                 <div class="board"></div>
         `;
-
-        let board = Gameboard.getBoard();
-
         //grab that board element
         const boardElement = document.querySelector(".board");
 
-        //populate it with buttons for the squares
-        for (let i = 0; i < squareAmount; ++i) {
-            boardElement.innerHTML += `<button class="square" data-index="${i}"></button>`;
-        }
+        //populate it with the squares
+        board.forEach((square, i) => {
+            boardElement.innerHTML += `<button class="square" data-index="${i}">${square.getSymbol()}</button>`;
+        });
+
+        //add event listener to the board
+        boardElement.addEventListener("click", (e) => {
+            let domSquare = e.target;
+            const square = board[domSquare.dataset.index];
+            square.acceptSymbol(game.getActivePlayer());
+
+            game.handOver();
+            ui_printBoard(game);
+
+        });
+
     };
+
+    ui_printForm();
 }
+
+ScreenController();
