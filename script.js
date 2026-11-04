@@ -24,7 +24,7 @@ const Gameboard = (() => {
 
     //returns amount of empty squares
     const emptySquares = () => {
-        return boardArr.filter((square) => square.getSymbol() === "-").length;
+        return boardArr.filter((square) => square.getSymbol() === '').length;
     };
 
     //Function that takes board postion string and converts it to the
@@ -80,7 +80,7 @@ const Gameboard = (() => {
     const gameWon = () => {
         //check the three columns for a vertical gameOver
         for (let i = 0; i < 3; ++i) {
-            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+            if (boardArr[i].getSymbol() === '') continue; //if one is empty then it can't be a win.
 
             let top = boardArr[i].getSymbol();
             //index+3 brings you to the square directly under
@@ -96,7 +96,7 @@ const Gameboard = (() => {
         }
         //check the rows
         for (let i = 0; i < 9; i += 3) {
-            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+            if (boardArr[i].getSymbol() === "") continue; //if one is empty then it can't be a win.
 
             let left = boardArr[i].getSymbol();
             let middle = boardArr[i + 1].getSymbol(); //+1 brings you one square to the right
@@ -109,7 +109,7 @@ const Gameboard = (() => {
         }
         //check diagonally. I'll use 0 and 2 as the two top corners and go diagonally from each
         for (let i = 0; i <= 2; i += 2) {
-            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+            if (boardArr[i].getSymbol() === "") continue; //if one is empty then it can't be a win.
 
             let top, middle, bottom;
             switch (i) {
@@ -293,6 +293,7 @@ function ScreenController() {
 
     const ui_printForm = () => {
 
+        //grab and populate container div
         const container = document.querySelector(".container");
         container.innerHTML = `
             <h2 class="intro-title">Welcome To Tic-Tac-Toe!</h2>
@@ -306,6 +307,7 @@ function ScreenController() {
 
         `;
 
+        //grab start button and apply event listener
         const startButton = document.querySelector(".startButton");
         startButton.addEventListener("click", () => {
             //
@@ -313,6 +315,10 @@ function ScreenController() {
             const p1name = document.querySelector("#p1name").value;
             const p2name = document.querySelector("#p2name").value;
             const game = Game(p1name, p2name);
+
+            //now set it to round 1
+            //set up the board and print it
+
             let round = 1;
             Gameboard.setUpBoard();
             ui_printBoard(game, round);
@@ -323,12 +329,10 @@ function ScreenController() {
         //set up the board and store a reference to it
         const board = Gameboard.getBoard();
 
-        //grab the container and put the title and game board in there
-        const container = document.querySelector(".container");
-        container.innerHTML = `
-                <h2 class="title">${game.getActivePlayer().getName()}'s turn</h2>
-                <div class="board"></div>
-        `;
+        //set the game title and put board div on screen
+        setGameTitle(game);
+        addBoardDiv();
+
         //grab that board element
         const boardElement = document.querySelector(".board");
 
@@ -339,14 +343,45 @@ function ScreenController() {
 
         //add event listener to the board
         boardElement.addEventListener("click", (e) => {
+            //implement the move and sign change in code
             let domSquare = e.target;
             const square = board[domSquare.dataset.index];
             square.acceptSymbol(game.getActivePlayer());
+            domSquare.textContent = square.getSymbol();
 
-            game.handOver();
-            ui_printBoard(game);
+            //if that move doesn't end the game, 
+            if (!Gameboard.gameOver()) {
+                //switch turns and show active player's name in title
+                game.handOver();
+                setGameTitle(game);
+            } else {
+                alert("game done enuh mi fada, don't know the result but it done");
+            }
+            // ui_printBoard(game, round);
 
         });
+
+    };
+
+    const setGameTitle = (game) => {
+
+        //if title element is already there, just replace the text
+        if (document.querySelector("h2.title")) {
+            document.querySelector("h2.title").textContent = `${game.getActivePlayer().getName()}'s turn`;
+            return;
+        }
+
+        //if not
+        //grab the container and put the title and game board in there
+        const container = document.querySelector(".container");
+        container.innerHTML = `
+                <h2 class="title">${game.getActivePlayer().getName()}'s turn</h2>
+        `;
+    };
+    const addBoardDiv = () => {
+        //grab container and put the board div in it
+        const container = document.querySelector(".container");
+        container.innerHTML += `<div class="board"></div>`;
 
     };
 
