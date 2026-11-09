@@ -1,86 +1,35 @@
 const Gameboard = (() => {
     //we'll have the array be nine elements long with values of
-    //either 'x', 'o', or '-' for empty.
+    //either 'x', 'o', or '' for empty.
     let boardArr = [];
+
     const setUpBoard = () => {
         for (let i = 0; i < 9; ++i) {
             boardArr[i] = new Square();
         }
     };
 
-    let winningSymbol = null;
-
-    const posArr = [
-        "topLeft",
-        "topMiddle",
-        "topRight",
-        "centerLeft",
-        "center",
-        "centerRight",
-        "bottomLeft",
-        "bottomMiddle",
-        "bottomRight",
-    ];
-
-    //returns amount of empty squares
-    const emptySquares = () => {
-        return boardArr.filter((square) => square.getSymbol() === "-").length;
-    };
-
-    //Function that takes board postion string and converts it to the
-    // corresponding array index.
-    const interpret = (position) => {
-        //the position param is a string that should be in the posArr below.
-        let index = posArr.findIndex(pos => pos === position);
-        if (index === -1)
-            console.error("Invalid board position");
-        return index;
-
-        // for (let i = 0; i < posArr.length; ++i) {
-        //     if (posArr[i] === position) {
-        //         return i;
-        //     }
-        // }
-        // console.error("Invalid board position");
-        // return -1;
-    };
-
     //return the board
     const getBoard = () => boardArr;
 
-    //show the board
-    const printBoard = () => {
-        for (let i = 0; i < 3; ++i) {
-            //This prints the boardArr in three rows of three.
-            //slice(start, end - not including end)
-            //first example: slice(0, 3)
 
-            console.log(
-                boardArr
-                    .slice(i * 3, i * 3 + 3)
-                    .map((Square) => Square.getSymbol())
-            );
-        }
+    //returns amount of empty squares
+    const emptySquares = () => {
+        return boardArr.filter((square) => square.getSymbol() === '').length;
     };
 
-    const acceptMove = (player, boardPosition) => {
-        //retrieve the index given the board position
-        let indexOfMove = interpret(boardPosition);
-        //retrieve the Square object at that index
-        let square = boardArr[indexOfMove];
+    //the symbol used to retrieve the winning player
+    let winningSymbol = null;
+    const getWinSymbol = () => winningSymbol;
 
-        if (square.getSymbol() === "-") {
-            square.acceptSymbol(player);
-        } else {
-            console.error("Invalid Move. The square is already occupied.");
-        }
-    };
-
-    //function to check if the game is won, ie. if there are three in a row
+    //the big function to check if the game is won
+    //ie. if there are three in a row
     const gameWon = () => {
+        winningSymbol = null;
+
         //check the three columns for a vertical gameOver
         for (let i = 0; i < 3; ++i) {
-            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+            if (boardArr[i].getSymbol() === '') continue; //if one is empty then it can't be a win.
 
             let top = boardArr[i].getSymbol();
             //index+3 brings you to the square directly under
@@ -96,7 +45,7 @@ const Gameboard = (() => {
         }
         //check the rows
         for (let i = 0; i < 9; i += 3) {
-            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+            if (boardArr[i].getSymbol() === "") continue; //if one is empty then it can't be a win.
 
             let left = boardArr[i].getSymbol();
             let middle = boardArr[i + 1].getSymbol(); //+1 brings you one square to the right
@@ -109,7 +58,7 @@ const Gameboard = (() => {
         }
         //check diagonally. I'll use 0 and 2 as the two top corners and go diagonally from each
         for (let i = 0; i <= 2; i += 2) {
-            if (boardArr[i].getSymbol() === "-") continue; //if one is empty then it can't be a win.
+            if (boardArr[i].getSymbol() === "") continue; //if one is empty then it can't be a win.
 
             let top, middle, bottom;
             switch (i) {
@@ -139,8 +88,6 @@ const Gameboard = (() => {
         }
     };
 
-    const getWinSymbol = () => winningSymbol;
-
     const gameOver = () => {
         //if the game has been won or all the squares are used up
         if (gameWon() || !emptySquares()) {
@@ -153,21 +100,23 @@ const Gameboard = (() => {
     return {
         setUpBoard,
         getBoard,
-        printBoard,
-        acceptMove,
         gameOver,
         gameWon,
-        getWinSymbol,
+        getWinSymbol
     };
 })(); //turned this to an IIFE, my first ever one in fact.
 
 class Square {
+    //this is how you make a field private
     #symbol;
     constructor() {
-        this.#symbol = "-";
+        this.#symbol = '';
     }
 
     acceptSymbol(player) {
+        //symbol needs to be the empty string, if not cancel this
+        if (this.#symbol !== '') return;
+
         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
             this.#symbol = player.getSymbol();
         } else {
@@ -193,12 +142,43 @@ class Player {
     resetScore() { this.score = 0 }
 }
 
-const Game = (function () {
-    const winMessage = (p1, p2) => {
+const Game = function (p1name, p2name) {
+
+    const players = [
+        new Player(p1name, 'x'),
+        new Player(p2name, 'o')
+    ];
+
+    let activePlayer = players[0];
+    const getActivePlayer = () => activePlayer;
+
+    //players take turns
+    const handOver = () => {
+        activePlayer = activePlayer === players[0] ? players[1] : players[0];
+    };
+
+
+    let roundNumber = 1;
+    const getRoundNumber = () => roundNumber;
+
+    //start new round, increasing the round number
+    const newRound = () => {
+        if (roundNumber < 3)
+            ++roundNumber;
+        else
+            console.error("Attempt to exceed round limit");
+    };
+
+    const isLastRound = () => roundNumber === 3;
+
+    //after last round, evaluate and announce the final winner
+    const winMessage = () => {
+        const p1 = players[0];
+        const p2 = players[1];
         if (p1.getScore() > p2.getScore()) {
             alert(
                 p1.getName() +
-                " IS THE WINNER WITH A SCORE OF " +
+                " IS THE FINAL WINNER WITH A SCORE OF " +
                 p1.getScore() +
                 "!"
             );
@@ -211,67 +191,177 @@ const Game = (function () {
                 `The final result is a draw, with both players scoring ${p2.getScore()}`
             );
         }
+        //end of the series
+        location.reload();
     };
 
-    const playRound = (player1, player2, roundNum) => {
-        let players = [player1, player2];
+    //after round ends, give points to the winner
+    //and announce the round outcome
+    const roundEnd = () => {
         let roundWinner = null;
-        let activePlayer = player1;
-
-        const handOver = () => {
-            activePlayer = activePlayer === player1 ? player2 : player1;
-        };
-
-        Gameboard.setUpBoard();
-        console.log(`Board initialized.\nScores: ${player1.getName()}-${player1.getScore()}, 
-        ${player2.getName()}-${player2.getScore()}`);
-        Gameboard.printBoard();
-        alert(
-            `Round ${roundNum} has started. ` +
-            activePlayer.getName() +
-            "'s turn."
-        );
-
-        do {
-            //read move from input
-            let movePos = prompt(
-                `${activePlayer.getName()}, place your ${activePlayer.getSymbol()}.`
-            );
-            Gameboard.acceptMove(activePlayer, movePos);
-            console.log(activePlayer.getName() + " has moved to " + movePos);
-            Gameboard.printBoard();
-            handOver();
-        } while (Gameboard.gameOver() === false);
-
+        //only call this when a round is over
+        //
+        //if the game is won, then give points
         if (Gameboard.gameWon()) {
-            players.map((player) => {
-                if (player.getSymbol() === Gameboard.getWinSymbol()) {
-                    roundWinner = player;
-                    roundWinner.increaseScore();
-                    alert(`${roundWinner.getName()} wins this round!`);
-                }
-            });
+            roundWinner = players.find((player) => player.getSymbol() === Gameboard.getWinSymbol())
+            roundWinner.increaseScore();
+            alert(`${roundWinner.getName()} wins this round!`);
         } else {
-            //a draw
+            //if it's a draw, then just say it's a draw
             alert(`This round is a draw!`);
         }
+        handOver();
     };
-    function playGame() {
-        alert("Welcome to Tic-tac-toe!");
-        let name1 = prompt("Player 1, enter your name. You will be using x");
-        let name2 = prompt("Player 2, enter your name. You will be using o");
-        rounds = 3;
-        alert(`The winner will be decided over ${rounds} rounds.`);
-        p1 = new Player(name1, "x");
-        p2 = new Player(name2, "o");
 
-        for (let currentRound = 1; currentRound <= rounds; ++currentRound) {
-            playRound(p1, p2, currentRound);
+    return {
+        winMessage,
+        getActivePlayer,
+        handOver,
+        roundEnd,
+        newRound,
+        isLastRound,
+        getRoundNumber
+    };
+}
+
+
+function ScreenController() {
+
+    const ui_printForm = () => {
+
+        //grab and populate container div
+        const container = document.querySelector(".container");
+        container.innerHTML = `
+            <h2 class="intro-title">Welcome To Tic-Tac-Toe!</h2>
+            <label for="p1name">Player 1, enter your name. You will be using x:</label>
+            <input type="text" id="p1name" class="textbox">
+
+            <label for="p2name">Player 2, enter your name. You will be using x:</label>
+            <input type="text" id="p2name" class="textbox">
+
+            <button class="startButton">Start!</button>
+
+        `;
+
+        //grab start button and apply event listener
+        const startButton = document.querySelector(".startButton");
+        startButton.addEventListener("click", () => {
+            //
+            //grab player names, clear the screen, and play the game using the names
+            const p1name = document.querySelector("#p1name").value;
+            const p2name = document.querySelector("#p2name").value;
+            const game = Game(p1name, p2name);
+
+            ui_printBoard(game);
+        });
+    };
+
+    const ui_printBoard = (game) => {
+        //set up the board and store a reference to it
+        Gameboard.setUpBoard();
+        const board = Gameboard.getBoard();
+
+        //put the game title and board element on screen
+        setGameTitle(game);
+        addBoardDiv();
+
+        //grab that board element and make sure it's empty
+        const boardElement = document.querySelector(".board");
+        boardElement.innerHTML = "";
+
+        //fill it with the squares
+        board.forEach((square, i) => {
+            boardElement.innerHTML += `<button class="square" data-index="${i}">${square.getSymbol()}</button>`;
+        });
+
+        //add the click handler, but only if it's round 1
+        if (game.getRoundNumber() !== 1) return;
+        boardElement.addEventListener("click", (e) => {
+            //implement the board move in code
+            let uiSquare = e.target;
+            const codeSquare = board[uiSquare.dataset.index];
+            codeSquare.acceptSymbol(game.getActivePlayer());
+            //display the move on screen
+            uiSquare.textContent = codeSquare.getSymbol();
+
+            //check if that move ended the round
+            if (Gameboard.gameOver()) {
+                //if this round isn't the final one
+                if (!game.isLastRound()) {
+                    //increase round number
+                    game.newRound();
+
+                    //wait a little then give the points & show message
+                    setTimeout(
+                        () => {
+                            game.roundEnd();
+                            ui_printBoard(game);
+                        },
+                        0.6
+                    );
+
+                }
+                //if this is the final round, the series is over
+                //annouce the round and series results
+                else {
+                    setTimeout(
+                        () => {
+                            game.roundEnd();
+                            game.winMessage();
+                        },
+                        0.6
+                    );
+                }
+            } else {
+                //round isn't done
+                //so switch turns and show active player's name in title
+                game.handOver();
+                setGameTitle(game);
+
+            }
+        });
+
+    };
+
+    //function for displaying title,
+    //which consists of the round and the player's turn
+    const setGameTitle = (game) => {
+
+        //if title element is already there, just replace the text
+        let title = document.querySelector("h2.title");
+        let roundText = document.querySelector("p");
+
+        if (title) {
+            title.textContent = `
+                ${game.getActivePlayer().getName()}'s turn. Place your ${game.getActivePlayer().getSymbol()}`;
+
+            roundText.textContent = `
+                Round ${game.getRoundNumber()}`
+
+            return;
         }
-        winMessage(p1, p2);
-    }
 
-    return { playGame };
-})();
+        //if it's not there
+        //grab the container and add them in
+        const container = document.querySelector(".container");
+        container.innerHTML = `
+                <p>Round ${game.getRoundNumber()}</p><br/>
+                <h2 class="title">${game.getActivePlayer().getName()}'s turn. Place your ${game.getActivePlayer().getSymbol()}</h2>
+        `;
+    };
 
-Game.playGame();
+    const addBoardDiv = () => {
+        const container = document.querySelector(".container");
+        const boardDiv = document.querySelector(".board");
+
+        //if there's no board div, add it
+        if (!boardDiv)
+            container.innerHTML += `<div class="board"></div>`;
+
+    };
+
+    //start everything by printing the form
+    ui_printForm();
+}
+
+ScreenController();
