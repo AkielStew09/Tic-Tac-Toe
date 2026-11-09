@@ -164,12 +164,12 @@ const Gameboard = (() => {
 class Square {
     #symbol;
     constructor() {
-        this.#symbol = " ";
+        this.#symbol = "-";
     }
 
     acceptSymbol(player) {
         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
-            this.symbol = player.getSymbol();
+            this.#symbol = player.getSymbol();
         } else {
             console.error(
                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
