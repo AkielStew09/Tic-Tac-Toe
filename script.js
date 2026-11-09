@@ -161,26 +161,6 @@ const Gameboard = (() => {
     };
 })(); //turned this to an IIFE, my first ever one in fact.
 
-// const Square = () => {
-//     let symbol = "-";
-//
-//     //function to be drawn in by a player. A setter, essentially.
-//     const acceptSymbol = (player) => {
-//         if (player.getSymbol() === "x" || player.getSymbol() === "o") {
-//             symbol = player.getSymbol();
-//         } else {
-//             console.error(
-//                 "Invalid symbol for Tic-Tac-Toe. Please use an 'x' or 'o'."
-//             );
-//         }
-//     };
-//
-//     //getter
-//     const getSymbol = () => symbol;
-//
-//     return { acceptSymbol, getSymbol };
-// };
-
 class Square {
     #symbol;
     constructor() {
@@ -199,18 +179,6 @@ class Square {
 
     getSymbol() { return this.#symbol }
 }
-
-// function Player(name, symbol) {
-//     let score = 0;
-//
-//     const getName = () => name;
-//     const getSymbol = () => symbol;
-//     const getScore = () => score;
-//     const increaseScore = () => ++score;
-//     const resetScore = () => score = 0;
-//
-//     return { getName, getSymbol, getScore, increaseScore, resetScore };
-// }
 
 class Player {
     constructor(name, symbol) {
